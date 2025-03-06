@@ -1,0 +1,87 @@
+{% extends 'loans/base.html' %}
+
+{% block extra_css %}
+<style>
+    .upload-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .upload-form {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .form-group input[type="file"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .submit-button {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .submit-button:hover {
+        background-color: #218838;
+    }
+    .error-message {
+        color: #dc3545;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+    }
+    .success-message {
+        color: #28a745;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <h2>批量导入贷款档案</h2>
+    
+    <div class="upload-form">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="file">选择Excel文件：</label>
+                <input type="file" id="file" name="file" accept=".xlsx,.xls" required>
+            </div>
+            <button type="submit" class="submit-button">上传文件</button>
+        </form>
+    </div>
+
+    {% if error_message %}
+    <div class="error-message">
+        {{ error_message }}
+    </div>
+    {% endif %}
+
+    {% if success_message %}
+    <div class="success-message">
+        {{ success_message }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

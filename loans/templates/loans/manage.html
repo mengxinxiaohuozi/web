@@ -1,0 +1,212 @@
+{% extends 'loans/base.html' %}
+
+{% block extra_css %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .filters {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .filters select {
+        width: 150px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+    .filters input[type="text"] {
+        width: 200px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .filters button {
+        padding: 8px 15px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .filters button:hover {
+        background-color: #1557b0;
+    }
+    .button {
+        padding: 10px 20px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .button:hover {
+        background-color: #1557b0;
+    }
+    .records-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .records-table th,
+    .records-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .records-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    .records-table tr:hover {
+        background-color: #f5f5f5;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+    .pagination a {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #1a73e8;
+    }
+    .pagination .current {
+        background-color: #1a73e8;
+        color: white;
+        border-color: #1a73e8;
+    }
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .status-pending { background-color: #ffd700; color: #000; }
+    .status-approved { background-color: #90EE90; color: #000; }
+    .status-rejected { background-color: #FFB6C1; color: #000; }
+    .status-completed { background-color: #87CEEB; color: #000; }
+    .button-group {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h2>贷款档案管理</h2>
+    
+    <div class="filters">
+        <form method="get" style="display: flex; align-items: center; gap: 10px;">
+            <select name="loan_type">
+                <option value="">所有贷款类型</option>
+                {% for type_value, type_label in loan_types %}
+                    <option value="{{ type_value }}" {% if type_value == selected_type %}selected{% endif %}>{{ type_label }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="year">
+                <option value="">所有年份</option>
+                {% for year_value in years %}
+                    <option value="{{ year_value }}" {% if year_value == selected_year %}selected{% endif %}>{{ year_value }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="status">
+                <option value="">所有状态</option>
+                {% for status_value, status_label in status_choices %}
+                    <option value="{{ status_value }}" {% if status_value == selected_status %}selected{% endif %}>{{ status_label }}</option>
+                {% endfor %}
+            </select>
+            
+            <input type="text" name="search" placeholder="搜索客户姓名/身份证号/档案编号..." value="{{ search_query }}">
+            <button type="submit">筛选</button>
+        </form>
+    </div>
+
+    <div class="button-group">
+        <a href="{% url 'loans:upload' %}" class="button">批量导入</a>
+        <a href="{% url 'loans:export_records' %}?{{ request.GET.urlencode }}" class="button">导出当前筛选结果</a>
+    </div>
+
+    <table class="records-table">
+        <thead>
+            <tr>
+                <th>档案编号</th>
+                <th>贷款类型</th>
+                <th>客户姓名</th>
+                <th>身份证号</th>
+                <th>年份</th>
+                <th>贷款金额</th>
+                <th>贷款日期</th>
+                <th>贷款期限</th>
+                <th>状态</th>
+                <th>备注</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.loan_number }}</td>
+                <td>{{ record.get_loan_type_display }}</td>
+                <td>{{ record.customer_name }}</td>
+                <td>{{ record.id_number }}</td>
+                <td>{{ record.year }}</td>
+                <td>{{ record.loan_amount }}</td>
+                <td>{{ record.loan_date }}</td>
+                <td>{{ record.loan_term }}</td>
+                <td>{{ record.get_status_display }}</td>
+                <td>{{ record.notes }}</td>
+                <td>
+                    <a href="{% url 'loans:edit_record' record.id %}" class="button">编辑</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 20px;">
+                    没有找到符合条件的记录
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if records.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&loan_type={{ selected_type }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">&laquo; 首页</a>
+            <a href="?page={{ records.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&loan_type={{ selected_type }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">上一页</a>
+        {% endif %}
+
+        <span>第 {{ records.number }} 页，共 {{ records.paginator.num_pages }} 页</span>
+
+        {% if records.has_next %}
+            <a href="?page={{ records.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&loan_type={{ selected_type }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">下一页</a>
+            <a href="?page={{ records.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&loan_type={{ selected_type }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">末页 &raquo;</a>
+        {% endif %}
+    </div>
+{% endblock %} 
