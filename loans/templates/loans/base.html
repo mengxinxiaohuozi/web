@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>贷款档案管理系统</title>
+    <style>
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        .user-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .nav-button {
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .nav-button:hover {
+            background-color: #357abd;
+        }
+        .logout-button {
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .logout-button:hover {
+            background-color: #c0392b;
+        }
+        .content {
+            margin-top: 60px;
+            padding: 20px;
+        }
+        .username {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated and request.path != '/loans/login/' %}
+    <div class="nav-buttons">
+        <a href="{% url 'loans:index' %}" class="nav-button">返回首页</a>
+        <a href="javascript:history.back()" class="nav-button">返回上一页</a>
+    </div>
+    <div class="user-info">
+        <span class="username">{{ user.username }}</span>
+        <a href="{% url 'loans:logout' %}" class="logout-button">退出登录</a>
+    </div>
+    {% endif %}
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑贷款档案</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button:hover {
+            background-color: #1557b0;
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .button.secondary {
+            background-color: #5f6368;
+        }
+        .button.secondary:hover {
+            background-color: #494c50;
+        }
+        .history-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .history-section pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .error-message {
+            color: #d93025;
+            background-color: #fce8e6;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>编辑贷款档案</h1>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="loan_number">档案编号</label>
+                <input type="text" id="loan_number" name="loan_number" value="{{ record.loan_number }}" required>
+            </div>
+            <div class="form-group">
+                <label for="loan_type">贷款类型</label>
+                <select id="loan_type" name="loan_type" required>
+                    {% for type in loan_types %}
+                        <option value="{{ type.code }}" {% if record.loan_type == type.code %}selected{% endif %}>
+                            {{ type.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="loan_date">贷款日期</label>
+                <input type="date" id="loan_date" name="loan_date" value="{{ record.loan_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="loan_amount">贷款金额</label>
+                <input type="number" id="loan_amount" name="loan_amount" value="{{ record.loan_amount }}" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="loan_term">贷款期限(月)</label>
+                <input type="number" id="loan_term" name="loan_term" value="{{ record.loan_term }}" required>
+            </div>
+            <div class="form-group">
+                <label for="notes">备注</label>
+                <textarea id="notes" name="notes">{{ record.notes }}</textarea>
+            </div>
+            <div class="button-group">
+                <button type="submit" class="button">保存修改</button>
+                <a href="{% url 'loans:manage' %}" class="button secondary">返回</a>
+            </div>
+        </form>
+
+        {% if record.change_history %}
+        <div class="history-section">
+            <h3>修改历史</h3>
+            <pre>{{ record.change_history }}</pre>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html> 
