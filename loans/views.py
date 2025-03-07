@@ -36,7 +36,7 @@ def download_template(request):
     # 创建示例数据
     data = {
         '贷款类型': ['便民卡', '普通贷款', '惠农e贷', '按揭贷款'],
-        '编号': ['LOAN001', 'LOAN002', 'LOAN003', 'LOAN004'],
+        '编号': ['1001', '1002', '1003', '1004'],
         '姓名': ['张三', '李四', '王五', '赵六'],
         '身份证号': ['110101199001011234', '110101199001011235', '110101199001011236', '110101199001011237'],
         '年份': [2024, 2024, 2024, 2024],
@@ -185,6 +185,14 @@ def upload_template(request):
                 if row['贷款类型'] not in [name for code, name in LoanRecord.LOAN_TYPES]:
                     errors.append(f"第{index+2}行：贷款类型 '{row['贷款类型']}' 无效")
                 
+                # 验证档案编号格式
+                try:
+                    loan_number = str(int(row['编号']))  # 确保是纯数字
+                    if not loan_number.isdigit():
+                        raise ValueError
+                except ValueError:
+                    errors.append(f"第{index+2}行：档案编号 '{row['编号']}' 必须为纯数字")
+                
                 # 验证身份证号格式
                 id_number = str(row['身份证号'])
                 if not (len(id_number) == 18 and id_number.isdigit()):
@@ -208,7 +216,7 @@ def upload_template(request):
                 try:
                     # 获取或创建记录
                     loan_record, created = LoanRecord.objects.get_or_create(
-                        loan_number=row['编号'],
+                        loan_number=str(int(row['编号'])),  # 确保是纯数字
                         defaults={
                             'loan_type': next(code for code, name in LoanRecord.LOAN_TYPES if name == row['贷款类型']),
                             'customer_name': row['姓名'],
@@ -322,8 +330,23 @@ def edit_record(request, record_id):
                 'notes': record.notes or ''
             }
             
+            # 验证新的档案编号格式
+            new_loan_number = request.POST.get('loan_number')
+            try:
+                new_loan_number = str(int(new_loan_number))  # 确保是纯数字
+                if not new_loan_number.isdigit():
+                    raise ValueError
+            except ValueError:
+                messages.error(request, '档案编号必须为纯数字')
+                return redirect('loans:edit_record', record_id=record_id)
+            
+            # 检查新编号是否已存在（排除当前记录）
+            if LoanRecord.objects.filter(loan_number=new_loan_number).exclude(id=record_id).exists():
+                messages.error(request, '该档案编号已存在')
+                return redirect('loans:edit_record', record_id=record_id)
+            
             # 更新记录
-            record.loan_number = request.POST.get('loan_number')
+            record.loan_number = new_loan_number
             record.loan_type = request.POST.get('loan_type')
             record.loan_date = request.POST.get('loan_date')
             record.loan_amount = request.POST.get('loan_amount')

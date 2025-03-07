@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
+
+def redirect_to_loans(request):
+    return redirect('loans:index')
 
 urlpatterns = [
+    path('', redirect_to_loans, name='root'),  # 根路径重定向
     path('admin/', admin.site.urls),
     path('loans/', include('loans.urls')),
 ]

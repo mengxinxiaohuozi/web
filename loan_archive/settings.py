@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-m3q%wi99&@6$2oo6(6h*ct4%bdd4^u7!qlqab52k6l_wd1)!@r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -123,6 +123,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -132,3 +136,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/loans/login/'
 LOGIN_REDIRECT_URL = '/loans/'
 LOGOUT_REDIRECT_URL = '/loans/login/'
+
+# 会话设置
+SESSION_COOKIE_AGE = 86400  # 24小时
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

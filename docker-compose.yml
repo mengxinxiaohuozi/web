@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    container_name: loan_archive
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./staticfiles:/app/staticfiles
+    environment:
+      - DJANGO_SETTINGS_MODULE=loan_archive.settings
+      - DJANGO_SECRET_KEY=your-secret-key-here
+      - DJANGO_DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=* 
